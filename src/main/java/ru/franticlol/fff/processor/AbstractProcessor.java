@@ -1,13 +1,13 @@
 package ru.franticlol.fff.processor;
 
-import ru.franticlol.fff.commons.Configuration;
+import ru.franticlol.fff.commons.ZookeeperConf;
 
 import java.util.List;
 
-public class MongoProcessor<T> implements Processor<T> {
-    Configuration configuration;
+public class AbstractProcessor<T> implements Processor<T> {
+    ZookeeperConf configuration;
 
-    public MongoProcessor(Configuration configuration) {
+    public AbstractProcessor(ZookeeperConf configuration) {
         this.configuration = configuration;
     }
 

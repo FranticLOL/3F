@@ -1,41 +1,55 @@
 package ru.franticlol.fff.core;
 
-import org.apache.zookeeper.*;
-import org.apache.zookeeper.data.ACL;
-import ru.franticlol.fff.commons.CommandLine;
-import ru.franticlol.fff.commons.CommandLineParser;
-import ru.franticlol.fff.commons.Configuration;
-import ru.franticlol.fff.commons.ConfigurationParser;
-import ru.franticlol.fff.extractor.Extractor;
-import ru.franticlol.fff.extractor.MongoExtractor;
-import ru.franticlol.fff.loader.HDFSLoader;
-import ru.franticlol.fff.loader.Loader;
-import ru.franticlol.fff.processor.MongoProcessor;
-import ru.franticlol.fff.processor.Processor;
+import ru.franticlol.fff.commons.*;
+import ru.franticlol.fff.concurrency.Partitioner;
+import ru.franticlol.fff.concurrency.ResourcePool;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 
 //добавить логи
 public class Application {
+
     public static void main(String[] args) {
         CommandLine commandLine = CommandLineParser.parse(args);
         File configFile = new File(commandLine.getOption("f").getOptionName());
         try {
             Configuration configuration = new Configuration(ConfigurationParser.parse(configFile));
             ZookeeperConf zookeeperConf = new ZookeeperConf(configuration);
-            zookeeperConf.setZookeeperConfiguration();
+            zookeeperConf.startZookeeperConfiguration();
 
-            Extractor extractor = new MongoExtractor(zookeeperConf);
-            Processor processor = new MongoProcessor(configuration);
-            List<Object> objects = extractor.extract();
-            Loader loader = new HDFSLoader();
-            loader.load(objects);
+            Class<?> partitionClass = Class.forName(zookeeperConf.getData("/conf/partitioner"));
+            Constructor<?> partitionClassConstructor = partitionClass.getConstructor(ZookeeperConf.class);
+            Partitioner partitioner = (Partitioner) partitionClassConstructor.newInstance(zookeeperConf);
+
+            partitioner.partition();
+
+            List<BatchProcess> tasksList = new ArrayList<>();
+
+
+            for (int i = 0; i < Integer.parseInt(zookeeperConf.getData("/conf/threadCount")); ++i) {
+                tasksList.add(new BatchProcess(zookeeperConf));
+            }
+
+            ResourcePool<BatchProcess> pool = new ResourcePool<>(tasksList, Integer.parseInt(zookeeperConf.getData("/conf/threadCount")));
+
+            while (true) {
+                pool.run();
+                if (pool.tasksIsEmpty()) {
+                    Thread.sleep(3000);
+                    if(pool.tasksIsEmpty()) {
+                        System.out.println("Poll has stopped due to no new tasks.");
+                        return;
+                    }
+                }
+            }
         } catch (FileNotFoundException ex) {
             System.out.println(ex.getMessage());
-        } catch (IOException e) {
+        } catch (InterruptedException | InstantiationException | ClassNotFoundException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e){ //| InstantiationException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException | InvocationTargetException e) {
             e.printStackTrace();
         }
     }

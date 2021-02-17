@@ -1,18 +1,14 @@
 package ru.franticlol.fff.extractor;
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.*;
 import org.bson.Document;
-import ru.franticlol.fff.commons.Configuration;
-import ru.franticlol.fff.core.ZookeeperConf;
+import ru.franticlol.fff.commons.ZookeeperConf;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class MongoExtractor<Object> implements Extractor<Object>{
+public class MongoExtractor<T> implements Extractor<T>{
     ZookeeperConf configuration;
 
     public MongoExtractor(ZookeeperConf configuration) {
@@ -20,15 +16,19 @@ public class MongoExtractor<Object> implements Extractor<Object>{
     }
 
     @Override
-    public List<Object> extract() {
+    public List<T> extract() {
         List<String> documents = new ArrayList<>();
-        //реализовать получение данных и передачу их в процессор, а оттуда в лоадер
+        Long threadCount = Long.valueOf(configuration.getData("/conf/threadCount"));
         MongoClient mongoClient = MongoClients.create(configuration.getData("/conf/mongo"));
         MongoDatabase database = mongoClient.getDatabase(configuration.getData("/conf/dbName"));
         MongoCollection<Document> collection = database.getCollection(configuration.getData("/conf/collectionName"));
-        for(Document document : collection.find()) {
+
+        Long limitCount = (collection.countDocuments() / threadCount) + 1;
+        Long skipCount = configuration.findFirst("/conf/freePartition");
+
+        for(Document document : collection.find().skip(Math.toIntExact(skipCount)).limit(Math.toIntExact(limitCount))) {
             documents.add(document.toJson());
         }
-        return (List<Object>) documents;
+        return (List<T>) documents;
     }
 }

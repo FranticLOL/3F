@@ -23,19 +23,21 @@ public class HDFSLoader<T> implements Loader<T>{
         configuration.addResource(new Path("/home/nikita/Apache/hadoop/etc/hadoop/hdfs-site.xml"));
         FileSystem fileSystem = FileSystem.get(configuration);
 
-        String fileName = "mongo.json";
+        String fileName = "mongo_" + Thread.currentThread().getName() + ".json";
         Path hdfsWritePath = new Path("/user/" + fileName);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonParser jp = new JsonParser();
-        JsonElement je = jp.parse((String) objects.get(0));
-        String prettyJsonString = gson.toJson(je);
-        prettyJsonString.replace("\n", "\r\n");
-
-        FSDataOutputStream fsDataOutputStream = fileSystem.create(hdfsWritePath,true);
+        FSDataOutputStream fsDataOutputStream = fileSystem.create(hdfsWritePath, true);
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fsDataOutputStream, StandardCharsets.UTF_8));
-        bufferedWriter.write(prettyJsonString);
-        bufferedWriter.newLine();
+        for(T document : objects) {
+            JsonElement je = jp.parse((String) document);
+            String prettyJsonString = gson.toJson(je);
+            prettyJsonString.replace("\n", "\r\n");
+            bufferedWriter.write(prettyJsonString);
+            bufferedWriter.newLine();
+        }
         bufferedWriter.close();
         fileSystem.close();
+        //переводить в зукипере портции в отдельную папку завершенных задач
     }
 }
