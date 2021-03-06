@@ -5,6 +5,6 @@ services:
       ports:
       - "2181:2181"
    my-app:
-      image: "test"
+      image: "app"
       depends_on:
       - zookeeper
