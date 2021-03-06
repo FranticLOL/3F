@@ -19,6 +19,12 @@ public class HDFSLoader<T> implements Loader<T>{
     @Override
     public void load(List<T> objects) throws IOException {
         Configuration configuration = new Configuration();
+        configuration.set("fs.hdfs.impl",
+                org.apache.hadoop.hdfs.DistributedFileSystem.class.getName()
+        );
+        configuration.set("fs.file.impl",
+                org.apache.hadoop.fs.LocalFileSystem.class.getName()
+        );
         configuration.addResource(new Path("/home/nikita/Apache/hadoop/etc/hadoop/core-site.xml"));
         configuration.addResource(new Path("/home/nikita/Apache/hadoop/etc/hadoop/hdfs-site.xml"));
         FileSystem fileSystem = FileSystem.get(configuration);

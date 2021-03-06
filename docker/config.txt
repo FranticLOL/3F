@@ -1,0 +1,12 @@
+mongo = mongodb://localhost:27017
+dbName = conFusion
+collectionName = people
+
+extractor = ru.franticlol.fff.extractor.MongoExtractor
+processor = ru.franticlol.fff.processor.AbstractProcessor
+loader = ru.franticlol.fff.loader.HDFSLoader
+partitioner = ru.franticlol.fff.concurrency.MongoPartitioner
+
+zookeeper = localhost:2181
+
+threadCount = 1

@@ -15,12 +15,15 @@ import java.util.List;
 public class Application {
 
     public static void main(String[] args) {
+        System.out.println("Starting application...");
         CommandLine commandLine = CommandLineParser.parse(args);
         File configFile = new File(commandLine.getOption("f").getOptionName());
         try {
+            System.out.println("Starting configuration...");
             Configuration configuration = new Configuration(ConfigurationParser.parse(configFile));
             ZookeeperConf zookeeperConf = new ZookeeperConf(configuration);
             zookeeperConf.startZookeeperConfiguration();
+            System.out.println("Configuration has ended.");
 
             Class<?> partitionClass = Class.forName(zookeeperConf.getData("/conf/partitioner"));
             Constructor<?> partitionClassConstructor = partitionClass.getConstructor(ZookeeperConf.class);
@@ -38,6 +41,7 @@ public class Application {
             ResourcePool<BatchProcess> pool = new ResourcePool<>(tasksList, Integer.parseInt(zookeeperConf.getData("/conf/threadCount")));
 
             while (true) {
+                System.out.println("Starting pool working...");
                 pool.run();
                 if (pool.tasksIsEmpty()) {
                     Thread.sleep(3000);

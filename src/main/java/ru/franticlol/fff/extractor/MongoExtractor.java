@@ -17,6 +17,7 @@ public class MongoExtractor<T> implements Extractor<T>{
 
     @Override
     public List<T> extract() {
+        System.out.println("Extracting...");
         List<String> documents = new ArrayList<>();
         Long threadCount = Long.valueOf(configuration.getData("/conf/threadCount"));
         MongoClient mongoClient = MongoClients.create(configuration.getData("/conf/mongo"));
