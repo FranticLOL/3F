@@ -2,12 +2,12 @@ package ru.franticlol.fff.commons;
 
 public class Option {
     private String id;
-    private String optionName;
+    private String optionValue;
     private Boolean required;
 
-    Option(String id, String optionName, Boolean required) {
+    Option(String id, String optionValue, Boolean required) {
         this.id = id;
-        this.optionName = optionName;
+        this.optionValue = optionValue;
         this.required = required;
     }
 
@@ -15,8 +15,8 @@ public class Option {
          return id;
     }
 
-    public String getOptionName() {
-        return optionName;
+    public String getOptionValue() {
+        return optionValue;
     }
 
     public Boolean optionIsRequired() {

@@ -33,8 +33,16 @@ public class ResourcePool<T extends Runnable> {
         tasks.offer(task);
     }
 
-    public void run() {
+    public void start() {
         resources.forEach(PoolWorker::start);
         resources.forEach(PoolWorker::run);
+    }
+
+    public void run() {
+        resources.forEach(PoolWorker::run);
+    }
+
+    public void stop() {
+        resources.forEach(PoolWorker::interrupt);
     }
 }

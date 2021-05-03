@@ -1,4 +1,4 @@
-package ru.franticlol.fff.concurrency;
+package ru.franticlol.fff.partition;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -17,14 +17,16 @@ public class MongoPartitioner implements Partitioner {
     }
 
     public void partition() {
-        Long threadCount = Long.valueOf(zookeeperConf.getData("/conf/threadCount"));
+        Long batchSize = Long.valueOf(zookeeperConf.getData("/conf/batchSize"));
+        System.out.println("Connecting to MongoDB");
         MongoClient mongoClient = MongoClients.create(zookeeperConf.getData("/conf/mongo"));
         MongoDatabase database = mongoClient.getDatabase(zookeeperConf.getData("/conf/dbName"));
         MongoCollection<Document> collection = database.getCollection(zookeeperConf.getData("/conf/collectionName"));
-
         Long docCount = collection.countDocuments();
-        for(long i = 0; i < threadCount; ++i) {
-            zookeeperConf.addZookeeperConfiguration("freePartition/" + i , String.valueOf(((i * ((docCount / threadCount) + 1)))).getBytes(StandardCharsets.UTF_8));
+        Long partitionCount = docCount % batchSize == 0 ? docCount / batchSize : (docCount / batchSize) + 1;
+        for(long i = 0; i < partitionCount; ++i) {
+            System.out.println(i * batchSize);
+            zookeeperConf.addZookeeperConfiguration("freePartition/" + i , String.valueOf(((i * batchSize))).getBytes(StandardCharsets.UTF_8));
         }
     }
 }

@@ -8,16 +8,37 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import ru.franticlol.fff.commons.ZookeeperConf;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
-public class HDFSLoader<T> implements Loader<T>{
+public class HDFSLoader<K, T> implements Loader<K, T> {
+    ZookeeperConf zookeeperConf;
+
+    public HDFSLoader(ZookeeperConf zookeeperConf) {
+        this.zookeeperConf = zookeeperConf;
+    }
+
     @Override
-    public void load(List<T> objects) throws IOException {
+    public void load(Map<K, T> objects) throws IOException {
+        if(objects.isEmpty()) {
+            return;
+        }
+
+        System.out.println("Loading started");
+
+        try {
+            Thread.sleep(30000);
+        } catch (InterruptedException ex) {
+            System.out.println(ex.getMessage());
+        }
+
         Configuration configuration = new Configuration();
         configuration.set("fs.hdfs.impl",
                 org.apache.hadoop.hdfs.DistributedFileSystem.class.getName()
@@ -27,23 +48,35 @@ public class HDFSLoader<T> implements Loader<T>{
         );
         configuration.addResource(new Path("/home/nikita/Apache/hadoop/etc/hadoop/core-site.xml"));
         configuration.addResource(new Path("/home/nikita/Apache/hadoop/etc/hadoop/hdfs-site.xml"));
+
         FileSystem fileSystem = FileSystem.get(configuration);
 
-        String fileName = "mongo_" + Thread.currentThread().getName() + ".json";
+        String fileName = InetAddress.getLocalHost().getCanonicalHostName() + "_" + Thread.currentThread().getName() + "_" + objects.keySet().stream().findFirst().get() + ".json";
         Path hdfsWritePath = new Path("/user/" + fileName);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonParser jp = new JsonParser();
-        FSDataOutputStream fsDataOutputStream = fileSystem.create(hdfsWritePath, true);
-        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fsDataOutputStream, StandardCharsets.UTF_8));
-        for(T document : objects) {
-            JsonElement je = jp.parse((String) document);
-            String prettyJsonString = gson.toJson(je);
-            prettyJsonString.replace("\n", "\r\n");
-            bufferedWriter.write(prettyJsonString);
-            bufferedWriter.newLine();
+        try {
+            FSDataOutputStream fsDataOutputStream = fileSystem.create(hdfsWritePath, true);
+            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fsDataOutputStream, StandardCharsets.UTF_8));
+            for (T documentList : objects.values()) {
+                for(String document : (List<String>) documentList) {
+                    JsonElement je = jp.parse(document);
+                    String prettyJsonString = gson.toJson(je);
+                    bufferedWriter.write(prettyJsonString);
+                    bufferedWriter.newLine();
+                }
+            }
+            System.out.println("Loading finished");
+            bufferedWriter.close();
+            fileSystem.close();
+
+            if (objects.keySet().stream().findFirst().isPresent()) {
+                String taskKey = (String) objects.keySet().stream().findFirst().get();
+                zookeeperConf.setEndTask(taskKey);
+            }
+
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
         }
-        bufferedWriter.close();
-        fileSystem.close();
-        //переводить в зукипере портции в отдельную папку завершенных задач
     }
 }

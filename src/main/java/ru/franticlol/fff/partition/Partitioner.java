@@ -1,4 +1,4 @@
-package ru.franticlol.fff.concurrency;
+package ru.franticlol.fff.partition;
 
 public interface Partitioner {
     void partition();

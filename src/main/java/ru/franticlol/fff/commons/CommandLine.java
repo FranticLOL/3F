@@ -6,9 +6,9 @@ import java.util.Map;
 public class CommandLine {
     Map<String, Option> optionMap;
 
-    CommandLine(Options options){
+    CommandLine(Options options) {
         optionMap = new HashMap<>();
-        for(Option option : options.getOptions()) {
+        for (Option option : options.getOptions()) {
             optionMap.put(option.getId(), option);
         }
     }

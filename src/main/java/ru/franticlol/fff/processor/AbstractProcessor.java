@@ -2,9 +2,9 @@ package ru.franticlol.fff.processor;
 
 import ru.franticlol.fff.commons.ZookeeperConf;
 
-import java.util.List;
+import java.util.Map;
 
-public class AbstractProcessor<T> implements Processor<T> {
+public class AbstractProcessor<K, T> implements Processor<K, T> {
     ZookeeperConf configuration;
 
     public AbstractProcessor(ZookeeperConf configuration) {
@@ -12,7 +12,7 @@ public class AbstractProcessor<T> implements Processor<T> {
     }
 
     @Override
-    public List<T> process(List<T> objects) {
+    public Map<K, T> process(Map<K, T> objects) {
         return objects;
     }
 }

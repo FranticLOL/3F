@@ -1,7 +1,7 @@
 package ru.franticlol.fff.processor;
 
-import java.util.List;
+import java.util.Map;
 
-public interface Processor<T> {
-    List<T> process(List<T> objects);
+public interface Processor<K, T> {
+    Map<K, T> process(Map<K, T> objects);
 }
