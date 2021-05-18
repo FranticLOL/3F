@@ -39,7 +39,7 @@ public class MongoExtractor<K, T> implements Extractor<K, T> {
         Long skipCount = null;
         try {
             sharedLock.acquire(); //startTask = getFreePartition + setPartitionToWorkStatus
-            skipCount = zookeeperConf.findFirstFreeTask("/conf/freePartition");
+            skipCount = zookeeperConf.findFirstFreeTask();
             System.out.println("SkipCount is " + skipCount);
             sharedLock.release();
         } catch (Exception ex) {

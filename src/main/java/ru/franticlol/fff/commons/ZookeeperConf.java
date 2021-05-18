@@ -100,9 +100,6 @@ public class ZookeeperConf {
     public void addZookeeperConfiguration(String key, byte[] data) {
         try {
             List<ACL> acls = ZooDefs.Ids.OPEN_ACL_UNSAFE;
-            if (zooKeeper.exists("/conf", false) == null) {
-                zooKeeper.create("/conf", null, acls, CreateMode.PERSISTENT);
-            }
 
             String znodePath = "/" + key;
             if (zooKeeper.exists("/conf" + znodePath, false) == null) {
@@ -116,6 +113,7 @@ public class ZookeeperConf {
 
     public synchronized void setTaskStartedFlag() {
         setZookeeperConfiguration("workStartedFlag", "true".getBytes(StandardCharsets.UTF_8));
+        setZookeeperConfiguration("workEndedFlag", "false".getBytes(StandardCharsets.UTF_8));
     }
 
     public synchronized void setTaskEndedFlag() {
@@ -123,9 +121,9 @@ public class ZookeeperConf {
         setZookeeperConfiguration("workEndedFlag", "true".getBytes(StandardCharsets.UTF_8));
     }
 
-    public synchronized Long findFirstFreeTask(String key) {
+    public synchronized Long findFirstFreeTask() {
         try {
-            List<String> freePartitionsList = zooKeeper.getChildren(key, null);
+            List<String> freePartitionsList = zooKeeper.getChildren("/conf/freePartition", null);
             if (freePartitionsList.stream().anyMatch(str -> str.matches("[0-9]+"))) {
                 String firstPartition = freePartitionsList.stream().filter(str -> str.matches("[0-9]+")).findFirst().get();
                 Long freePartition = Long.valueOf(getData("/conf/freePartition/" + firstPartition));

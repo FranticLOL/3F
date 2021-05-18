@@ -10,7 +10,7 @@ public class PoolWorker<T extends Runnable> extends Thread {
     @Override
     public void run() {
         while(!resourcePool.tasksIsEmpty()) {
-            T task = resourcePool.pollResource();
+            T task = resourcePool.pollTask();
             System.out.println(this.getName() + ": got from queue : " + task.toString());
             try {
                 task.run();

@@ -21,7 +21,7 @@ public class ResourcePool<T extends Runnable> {
         }
     }
 
-    public synchronized T pollResource() {
+    public synchronized T pollTask() {
         return tasks.poll();
     }
 

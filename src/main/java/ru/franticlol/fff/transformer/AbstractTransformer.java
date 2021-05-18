@@ -1,13 +1,13 @@
-package ru.franticlol.fff.processor;
+package ru.franticlol.fff.transformer;
 
 import ru.franticlol.fff.commons.ZookeeperConf;
 
 import java.util.Map;
 
-public class AbstractProcessor<K, T> implements Processor<K, T> {
+public class AbstractTransformer<K, T> implements Transformer<K, T> {
     ZookeeperConf configuration;
 
-    public AbstractProcessor(ZookeeperConf configuration) {
+    public AbstractTransformer(ZookeeperConf configuration) {
         this.configuration = configuration;
     }
 

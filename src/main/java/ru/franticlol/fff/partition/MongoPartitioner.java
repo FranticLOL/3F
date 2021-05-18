@@ -16,6 +16,7 @@ public class MongoPartitioner implements Partitioner {
         this.zookeeperConf = zookeeperConf;
     }
 
+    @Override
     public void partition() {
         Long batchSize = Long.valueOf(zookeeperConf.getData("/conf/batchSize"));
         System.out.println("Connecting to MongoDB");
@@ -26,7 +27,7 @@ public class MongoPartitioner implements Partitioner {
         Long partitionCount = docCount % batchSize == 0 ? docCount / batchSize : (docCount / batchSize) + 1;
         for(long i = 0; i < partitionCount; ++i) {
             System.out.println(i * batchSize);
-            zookeeperConf.addZookeeperConfiguration("freePartition/" + i , String.valueOf(((i * batchSize))).getBytes(StandardCharsets.UTF_8));
+            zookeeperConf.addZookeeperConfiguration("freePartition/" + i , String.valueOf(i * batchSize).getBytes(StandardCharsets.UTF_8));
         }
     }
 }

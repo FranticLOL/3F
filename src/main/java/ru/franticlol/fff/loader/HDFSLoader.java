@@ -1,5 +1,5 @@
 package ru.franticlol.fff.loader;
-
+/*
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -79,4 +79,4 @@ public class HDFSLoader<K, T> implements Loader<K, T> {
             System.out.println(ex.getMessage());
         }
     }
-}
+}*/
