@@ -36,6 +36,12 @@ public class S3Loader<K, T> implements Loader<K, T> {
 
         System.out.println("Loading started");
 
+        try {
+            Thread.sleep(30000);
+        } catch (InterruptedException ex) {
+            System.out.println(ex.getMessage());
+        }
+
         String fileName = InetAddress.getLocalHost().getCanonicalHostName() + "_" + Thread.currentThread().getName() + "_" + objects.keySet().stream().findFirst().get() + ".json";
 
   //      Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -56,8 +62,8 @@ public class S3Loader<K, T> implements Loader<K, T> {
         out.close();
 
         AWSCredentials credentials = new BasicAWSCredentials(
-                "AKIA3G4GSWO6CZFGSFAQ",
-                "1MsT9vOlIWmJZ1E1x1hRsSQzD83U1DYPFxfBAsoo"
+                "AKIA3G4GSWO6PQCVQNMF",
+                "F1SeLD7e5gQ/hY9zIkXHR0B59J6bRpTZj+Q7bQ/L"
         );
 
         AmazonS3 s3client = AmazonS3ClientBuilder
@@ -70,8 +76,8 @@ public class S3Loader<K, T> implements Loader<K, T> {
 
         s3client.putObject(
                 bucketName,
-                "/" + fileName,
-                new File("/" + fileName)
+                fileName,
+                new File(fileName)
         );
 
 

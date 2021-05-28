@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: my-app
+  name: my-app
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      io.kompose.service: my-app
+      application: my-app
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.22.0 (955b78124)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: my-app
+        application: my-app
+    spec:
+      containers:
+        - image: docker.io/tukituki/test1
+          name: my-app
+          resources:
+            requests:
+              cpu: 5m
+              memory: 5Mi
+          resources: {}
+      restartPolicy: Always
+status: {}
